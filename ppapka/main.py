@@ -1,5 +1,5 @@
 from pygame import *
-from time import time
+
 from random import randint
 window = display.set_mode((600, 300))
 display.set_caption('тттанки')
@@ -176,29 +176,126 @@ class TANK_pl(GameSprite):
                 bullets.append(bullet)
                 for i in bullets:
                     i.reset()
-            
+class TANK_en(GameSprite):
+    def __init__(self, player_image, player_x, player_y, size_x, size_y, player_speed,vector='d'):
+        super().__init__(player_image, player_x, player_y, size_x, size_y, player_speed)
+        self.vector = vector
+    def update(self):
+        if self.vector== 'd':
+            self.rect.x+=self.speed
+            self.image = transform.scale(image.load('TANK_1_d.png'), (30, 30))
+            for t in walls:
+                if self.rect.colliderect(t) or self.rect.x>=575:
+                    self.rect.x-=self.speed
+                    if randint(1,2)==1:
+                        self.vector='w'
+                    else:
+                        self.vector='s'
+        elif self.vector== 'a':
+            self.rect.x-=self.speed
+            self.image = transform.scale(image.load('TANK_1_a.png'), (30, 30))
+            for t in walls:
+                if self.rect.colliderect(t) or self.rect.x<=-5:
+                    self.rect.x+=self.speed
+                    if randint(1,2)==1:
+                        self.vector='w'
+                    else:
+                        self.vector='s'
+        elif self.vector== 'w':
+            self.rect.y-=self.speed
+            self.image = transform.scale(image.load('TANK_1_w.png'), (30, 30))
+            for t in walls:
+                if self.rect.colliderect(t) or self.rect.y<=-5:
+                    self.rect.y+=self.speed
+                    if randint(1,2)==1:
+                        self.vector='a'
+                    else:
+                        self.vector='d'
+        elif self.vector== 's':
+            self.rect.y+=self.speed
+            self.image = transform.scale(image.load('TANK_1_s.png'), (30, 30))
+            for t in walls:
+                if self.rect.colliderect(t) or self.rect.y>=275:
+                    self.rect.y-=self.speed
+                    if randint(1,2)==1:
+                        self.vector='a'
+                    else:
+                        self.vector='d'
+    def up(self):
+        u=randint(1,4)
+        if u==1:
+            self.vector='a'
+        elif u==2:
+            self.vector='s'
+        elif u==3:
+            self.vector='d'
+        elif u==4:
+            self.vector='w'
+    def fire(self):
+        if self.vector == 'w':
+            x=self.rect.x
+            y=self.rect.y-5
+            bullet=bullet_w_1('pyla_w.png',x,y,30,10,10,'1')
+            bullets.append(bullet)
+            for i in bullets:
+                i.reset()
+        elif self.vector == 'd':
+            x=self.rect.x+25
+            y=self.rect.y
+            bullet=bullet_d_1('pyla_d.png',x,y,10,30,10,'1')
+            bullets.append(bullet)
+            for i in bullets:
+                i.reset()
+        elif self.vector == 's':
+            x=self.rect.x
+            y=self.rect.y+25
+            bullet=bullet_s_1('pyla_s.png',x,y,30,10,10,'1')
+            bullets.append(bullet)
+            for i in bullets:
+                i.reset()
+        elif self.vector == 'a':
+            x=self.rect.x+5
+            y=self.rect.y
+            bullet=bullet_a_1('pyla_a.png',x,y,10,30,10,'1')
+            bullets.append(bullet)
+            for i in bullets:
+                i.reset()
+
+
+
+
+enemy = TANK_en('TANK_1_d.png',30,30,30,30,5)
 tttank= TANK_pl('TANK_1_w.png',540,120,30,30,5,'w')
 creat_wall(270,30,27,3)
 creat_wall(90,60,3,18)
 creat_wall(270,240,27,3)
-creat_wall(240,90,3,12)
-ui= time()
+creat_wall(210,90,3,12)
+
 game= True
 finish=True
-clock = pygame.time.Clock()
+clock = time.Clock()
+from time import time
+ui= time()
 while game:
     if finish:
         window.fill((0,0,0))
         tttank.update()
         tttank.reset()
         tttank.fire()
+        enemy.update()
+        enemy.reset()
         for i in walls:
             i.reset()
         for i in bullets:
             i.update()
             i.reset()
-    ui2=time()
-    print(ui2-ui)
+
+        ui2=time()
+        if ui2-ui>=0.6:
+            enemy.up()
+        if ui2-ui>=1:
+            enemy.fire()
+            ui=time()    
 
 
     for e in event.get():
